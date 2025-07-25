@@ -10,6 +10,37 @@ require_once '../config/database.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch($method) {
+    case 'GET':
+        // Get users with optional filters
+        $sql = "SELECT * FROM kullanicilar";
+        $conditions = [];
+
+        if (isset($_GET['kullanici_adi'])) {
+            $kullanici_adi = $conn->real_escape_string($_GET['kullanici_adi']);
+            $conditions[] = "kullanici_adi = '$kullanici_adi'";
+        }
+
+        if (isset($_GET['yetki'])) {
+            $yetki = $conn->real_escape_string($_GET['yetki']);
+            $conditions[] = "yetki = '$yetki'";
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $result = $conn->query($sql);
+        $kullanicilar = [];
+    
+        if($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $kullanicilar[] = $row;
+            }
+        }
+    
+        echo json_encode($kullanicilar);
+        break;
+
     case 'POST':
         // body username, password login işlemleri
         $data = json_decode(file_get_contents("php://input"));
