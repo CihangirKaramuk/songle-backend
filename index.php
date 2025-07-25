@@ -1,7 +1,7 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+require_once 'config/database.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,6 +43,38 @@ header("Content-Type: application/json; charset=UTF-8");
     </style>
 </head>
 <body>
+    <?php
+     if(isset($_GET['id'])) {
+        $id = $conn->real_escape_string($_GET['id']);
+        $sql = "SELECT * FROM sarkilar WHERE id = $id";
+    } else if(isset($_GET['kategori'])) {
+        $kategori = $conn->real_escape_string($_GET['kategori']);
+        $sql = "SELECT * FROM sarkilar WHERE kategori = '$kategori'";
+    } else {
+        $sql = "SELECT * FROM sarkilar";
+    }
+    
+    $result = $conn->query($sql);
+    $songs = [];
+    
+    if($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $songs[] = $row;
+        }
+    }
+    
+    ?>
+    muzıkler lıstesı
+    <ul>
+    <?php
+    foreach($songs as $song) {
+        echo "<li>" . $song['cevap'] . "</li>";
+    }
+    ?>
+    </ul>
+
+    <br>
+
     <h1>Songle API Documentation</h1>
     <p>Welcome to the Songle API. Below are the available endpoints:</p>
     

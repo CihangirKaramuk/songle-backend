@@ -22,7 +22,7 @@ if ($conn->query($sql) === FALSE) {
 $conn->select_db(DB_NAME);
 
 // Create songs table if not exists
-$sql = "CREATE TABLE IF NOT EXISTS sarkilar (
+$create_sarkilar_table = "CREATE TABLE IF NOT EXISTS sarkilar (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     kategori VARCHAR(100) NOT NULL,
     cevap VARCHAR(255) NOT NULL,
@@ -31,7 +31,32 @@ $sql = "CREATE TABLE IF NOT EXISTS sarkilar (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
-if ($conn->query($sql) === FALSE) {
+// Create categories table if not exists
+$create_kategoriler_table = "CREATE TABLE IF NOT EXISTS kategoriler (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    isim VARCHAR(100) NOT NULL,
+    parent_id INT(11) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
+$create_kullanicilar_table = "CREATE TABLE IF NOT EXISTS kullanicilar (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    kullanici_adi VARCHAR(100) NOT NULL,
+    sifre VARCHAR(255) NOT NULL,
+    yetki INT(11) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
+if ($conn->query($create_sarkilar_table) === FALSE) {
     die("Error creating table: " . $conn->error);
 }
+
+if ($conn->query($create_kategoriler_table) === FALSE) {
+    die("Error creating table: " . $conn->error);
+}
+
+if ($conn->query($create_kullanicilar_table) === FALSE) {
+    die("Error creating table: " . $conn->error);
+}
+
 ?>
