@@ -11,16 +11,29 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch($method) {
     case 'GET':
-        // Get all songs or single song by id
-        if(isset($_GET['id'])) {
+       // Get all songs or filter by parameters
+        $sql = "SELECT * FROM sarkilar";
+        $conditions = [];
+
+        if (isset($_GET['id'])) {
             $id = $conn->real_escape_string($_GET['id']);
-            $sql = "SELECT * FROM sarkilar WHERE id = $id";
-        } else if(isset($_GET['kategori'])) {
-            $kategori = $conn->real_escape_string($_GET['kategori']);
-            $sql = "SELECT * FROM sarkilar WHERE kategori = '$kategori'";
-        } else {
-            $sql = "SELECT * FROM sarkilar";
+            $conditions[] = "id = $id";
         }
+
+        if (isset($_GET['kategori'])) {
+            $kategori = $conn->real_escape_string($_GET['kategori']);
+            $conditions[] = "kategori = '$kategori'";
+        }
+
+        if (isset($_GET['cevap'])) {
+            $cevap = $conn->real_escape_string($_GET['cevap']);
+            $conditions[] = "cevap = '$cevap'";
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
         
         $result = $conn->query($sql);
         $songs = [];
