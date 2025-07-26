@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Anamakine: 127.0.0.1
--- Üretim Zamanı: 25 Tem 2025, 19:26:42
+-- Üretim Zamanı: 26 Tem 2025, 14:12:14
 -- Sunucu sürümü: 10.4.32-MariaDB
 -- PHP Sürümü: 8.1.25
 
@@ -39,11 +39,20 @@ CREATE TABLE `kategoriler` (
 --
 
 INSERT INTO `kategoriler` (`id`, `isim`, `parent_id`, `created_at`) VALUES
-(1, 'turkce', NULL, '2025-07-25 16:02:43'),
+(1, 'türkçe', NULL, '2025-07-25 16:02:43'),
 (2, 'rock', 1, '2025-07-25 16:03:12'),
 (3, 'yabancı', NULL, '2025-07-25 16:04:57'),
 (4, 'rock', 3, '2025-07-25 16:05:09'),
-(5, 'pop', 1, '2025-07-25 16:03:12');
+(5, 'pop', 1, '2025-07-25 16:03:12'),
+(6, 'hip hop', 1, '2025-07-25 16:03:12'),
+(7, 'pop', 3, '2025-07-25 16:05:09'),
+(8, 'hip hop', 3, '2025-07-25 16:05:09'),
+(9, 'dizi', NULL, '2025-07-25 16:04:57'),
+(10, 'film', NULL, '2025-07-25 16:04:57'),
+(11, 'türkçe', 9, '2025-07-25 16:05:09'),
+(12, 'yabancı', 9, '2025-07-25 16:05:09'),
+(13, 'türkçe', 10, '2025-07-25 16:05:09'),
+(14, 'yabancı', 10, '2025-07-25 16:05:09');
 
 -- --------------------------------------------------------
 
@@ -82,14 +91,6 @@ CREATE TABLE `sarkilar` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Tablo döküm verisi `sarkilar`
---
-
-INSERT INTO `sarkilar` (`id`, `kategori`, `cevap`, `sarki`, `dosya`, `created_at`) VALUES
-(8, 'turkce-pop', 'Ey Aşk', '🎵 Şarkı çalıyor. (Ey Aşk)', 'songs/Sezen_Aksu-Ey_Ak.mp3', '2025-07-25 17:17:36'),
-(9, 'turkce-rock', 'Yaşamak İstemem', '🎵 Şarkı çalıyor. (Yaşamak İstemem)', 'songs/Yavuz_etin-Yaamak_stemem.mp3', '2025-07-25 17:22:47');
-
---
 -- Dökümü yapılmış tablolar için indeksler
 --
 
@@ -119,7 +120,7 @@ ALTER TABLE `sarkilar`
 -- Tablo için AUTO_INCREMENT değeri `kategoriler`
 --
 ALTER TABLE `kategoriler`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Tablo için AUTO_INCREMENT değeri `kullanicilar`
@@ -131,7 +132,7 @@ ALTER TABLE `kullanicilar`
 -- Tablo için AUTO_INCREMENT değeri `sarkilar`
 --
 ALTER TABLE `sarkilar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
