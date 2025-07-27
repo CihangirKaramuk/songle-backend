@@ -56,8 +56,14 @@ switch($method) {
             $cevap = $conn->real_escape_string($data->cevap);
             $sarki = $conn->real_escape_string($data->sarki);
             $dosya = $conn->real_escape_string($data->dosya);
+            $kapak = isset($data->kapak) && $data->kapak !== '' ? $conn->real_escape_string($data->kapak) : null;
             
-            $sql = "INSERT INTO sarkilar (kategori, cevap, sarki, dosya) VALUES ('$kategori', '$cevap', '$sarki', '$dosya')";
+            // Insert including optional kapak column
+            if($kapak !== null) {
+                $sql = "INSERT INTO sarkilar (kategori, cevap, sarki, dosya, kapak) VALUES ('$kategori', '$cevap', '$sarki', '$dosya', '$kapak')";
+            } else {
+                $sql = "INSERT INTO sarkilar (kategori, cevap, sarki, dosya, kapak) VALUES ('$kategori', '$cevap', '$sarki', '$dosya', NULL)";
+            }
             
             if($conn->query($sql) === TRUE) {
                 http_response_code(201);
@@ -84,6 +90,14 @@ switch($method) {
             if(!empty($data->cevap)) $updates[] = "cevap = '" . $conn->real_escape_string($data->cevap) . "'";
             if(!empty($data->sarki)) $updates[] = "sarki = '" . $conn->real_escape_string($data->sarki) . "'";
             if(!empty($data->dosya)) $updates[] = "dosya = '" . $conn->real_escape_string($data->dosya) . "'";
+            if(isset($data->kapak)) {
+                if($data->kapak === '') {
+                    // Allow clearing cover by setting to NULL
+                    $updates[] = "kapak = NULL";
+                } else {
+                    $updates[] = "kapak = '" . $conn->real_escape_string($data->kapak) . "'";
+                }
+            }
             
             if(!empty($updates)) {
                 $sql = "UPDATE sarkilar SET " . implode(', ', $updates) . " WHERE id = $id";

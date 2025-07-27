@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Anamakine: 127.0.0.1
--- Üretim Zamanı: 26 Tem 2025, 14:12:14
+-- Üretim Zamanı: 27 Tem 2025, 23:57:31
 -- Sunucu sürümü: 10.4.32-MariaDB
 -- PHP Sürümü: 8.1.25
 
@@ -87,6 +87,7 @@ CREATE TABLE `sarkilar` (
   `cevap` varchar(255) NOT NULL,
   `sarki` text NOT NULL,
   `dosya` text NOT NULL,
+  `kapak` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -132,7 +133,7 @@ ALTER TABLE `kullanicilar`
 -- Tablo için AUTO_INCREMENT değeri `sarkilar`
 --
 ALTER TABLE `sarkilar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

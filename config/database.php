@@ -28,6 +28,7 @@ $create_sarkilar_table = "CREATE TABLE IF NOT EXISTS sarkilar (
     cevap VARCHAR(255) NOT NULL,
     sarki TEXT NOT NULL,
     dosya TEXT NOT NULL,
+    kapak VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
