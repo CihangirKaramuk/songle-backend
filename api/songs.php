@@ -7,6 +7,13 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 require_once '../config/database.php';
 
+// Helper to return error responses as JSON and exit
+function jsonError(string $message, int $statusCode = 500): void {
+    http_response_code($statusCode);
+    echo json_encode(["error" => $message], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch($method) {
@@ -36,6 +43,9 @@ switch($method) {
 
         
         $result = $conn->query($sql);
+        if ($result === false) {
+            jsonError("Database query error: " . $conn->error);
+        }
         $songs = [];
         
         if($result->num_rows > 0) {
