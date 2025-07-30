@@ -26,6 +26,9 @@ switch($method) {
             $id = $conn->real_escape_string($_GET['id']);
             $conditions[] = "id = $id";
         }
+        if (isset($_GET['linkliler'])) {
+            $conditions[] = "kapak LIKE '%http%'";
+        }
 
         if (isset($_GET['kategori'])) {
             $kategori = $conn->real_escape_string($_GET['kategori']);

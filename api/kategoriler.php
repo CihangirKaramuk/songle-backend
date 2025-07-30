@@ -22,8 +22,8 @@ switch($method) {
             $sql = "SELECT * FROM kategoriler WHERE parent_id IS NULL";
         } else if(isset($_GET['kategori_id'])) {
             $kategori_id = $conn->real_escape_string($_GET['kategori_id']);
-            $sql = "SELECT * FROM kategoriler WHERE parent_id = '$kategori_id'";
-        }    else {
+            $sql = "SELECT * FROM kategoriler WHERE parent_id = '$kategori_id'"; 
+        } else {
             $sql = "SELECT * FROM kategoriler";
         }
         
