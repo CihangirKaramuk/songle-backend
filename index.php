@@ -88,7 +88,7 @@ require_once 'config/database.php';
         "id": 1,
         "kategori": "turkce-rock",
         "cevap": "Duman - Kufi",
-        "sarki": "🎵 Şarkı çalıyor. (Duman - Kufi)",
+        "sarki": "🎵 (Duman - Kufi)",
         "dosya": "https://...",
         "created_at": "2025-07-25 12:00:00"
     }
@@ -110,7 +110,7 @@ require_once 'config/database.php';
         <pre>{
     "kategori": "turkce-rock",
     "cevap": "Duman - Kufi",
-    "sarki": "🎵 Şarkı çalıyor. (Duman - Kufi)",
+    "sarki": "🎵 (Duman - Kufi)",
     "dosya": "https://..."
 }</pre>
     </div>
@@ -124,7 +124,7 @@ require_once 'config/database.php';
     "id": 1,
     "kategori": "turkce-rock",
     "cevap": "Duman - Kufi (Updated)",
-    "sarki": "🎵 Şarkı çalıyor. (Duman - Kufi) - Updated",
+    "sarki": "🎵 (Duman - Kufi) - Updated",
     "dosya": "https://..."
 }</pre>
         <p>Note: Only include the fields you want to update.</p>
