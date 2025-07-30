@@ -5,7 +5,7 @@ require_once 'config/database.php';
 $example_song = [
     'kategori' => 'turkce-rock',
     'cevap' => 'Duman - Kufi',
-    'sarki' => '🎵 (Duman - Kufi)',
+    'sarki' => '🎵 Duman - Kufi',
     'dosya' => 'https://cdnt-preview.dzcdn.net/api/1/1/c/7/1/0/c712a7344197b852c187c27ab63b85c5.mp3?hdnea=exp=1753434916~acl=/api/1/1/c/7/1/0/c712a7344197b852c187c27ab63b85c5.mp3*~data=user_id=0,application_id=42~hmac=a565503233f58f9be8c1a382b902a82c2056693818edcaf3c50b802c43734368'
 ];
 
