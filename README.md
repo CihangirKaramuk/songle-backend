@@ -27,6 +27,7 @@ Songle, şarkı tahmin oyunu için basit bir PHP backend API'sidir. Bu API, şar
 ## API Dokümantasyonu
 
 Tüm API endpoint'leri ve kullanım örnekleri için tarayıcınızda şu adresi ziyaret edin:
+
 ```
 http://localhost/songle-backend/
 ```
@@ -57,11 +58,13 @@ CREATE TABLE IF NOT EXISTS sarkilar (
 ### Örnek Veri Ekleme
 
 Örnek veri eklemek için tarayıcıda şu adresi ziyaret edin:
+
 ```
 http://localhost/songle-backend/add_example_data.php
 ```
 
 Veya komut satırından:
+
 ```
 php add_example_data.php
 ```
