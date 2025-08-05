@@ -74,12 +74,19 @@ if ($conn->query($create_ayarlar_table) === FALSE) {
     die("Error creating table: " . $conn->error);
 }
 
-// Add foreign key constraint for ayarlar table
-$add_foreign_key = "ALTER TABLE ayarlar 
-ADD CONSTRAINT fk_ayarlar_kullanici 
-FOREIGN KEY (kullanici_id) REFERENCES kullanicilar(id) ON DELETE CASCADE";
+// Add foreign key constraint for ayarlar table if it doesn't exist
+$check_foreign_key = "SELECT CONSTRAINT_NAME 
+                      FROM information_schema.TABLE_CONSTRAINTS 
+                      WHERE TABLE_SCHEMA = '" . DB_NAME . "' 
+                      AND TABLE_NAME = 'ayarlar' 
+                      AND CONSTRAINT_NAME = 'fk_ayarlar_kullanici'";
 
-// Try to add foreign key, ignore if it already exists
-$conn->query($add_foreign_key);
+$result = $conn->query($check_foreign_key);
+if ($result->num_rows === 0) {
+    $add_foreign_key = "ALTER TABLE ayarlar 
+    ADD CONSTRAINT fk_ayarlar_kullanici 
+    FOREIGN KEY (kullanici_id) REFERENCES kullanicilar(id) ON DELETE CASCADE";
+    $conn->query($add_foreign_key);
+}
 
 ?>
