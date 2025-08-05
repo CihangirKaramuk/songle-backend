@@ -48,6 +48,16 @@ $create_kullanicilar_table = "CREATE TABLE IF NOT EXISTS kullanicilar (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
+$create_ayarlar_table = "CREATE TABLE IF NOT EXISTS ayarlar (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    kullanici_id INT,
+    tema VARCHAR(20) DEFAULT 'dark',
+    sayfa_boyutu INT DEFAULT 20,
+    bildirim_sesi BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)";
+
 if ($conn->query($create_sarkilar_table) === FALSE) {
     die("Error creating table: " . $conn->error);
 }
@@ -59,5 +69,17 @@ if ($conn->query($create_kategoriler_table) === FALSE) {
 if ($conn->query($create_kullanicilar_table) === FALSE) {
     die("Error creating table: " . $conn->error);
 }
+
+if ($conn->query($create_ayarlar_table) === FALSE) {
+    die("Error creating table: " . $conn->error);
+}
+
+// Add foreign key constraint for ayarlar table
+$add_foreign_key = "ALTER TABLE ayarlar 
+ADD CONSTRAINT fk_ayarlar_kullanici 
+FOREIGN KEY (kullanici_id) REFERENCES kullanicilar(id) ON DELETE CASCADE";
+
+// Try to add foreign key, ignore if it already exists
+$conn->query($add_foreign_key);
 
 ?>
