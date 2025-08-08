@@ -74,6 +74,31 @@ if ($conn->query($create_ayarlar_table) === FALSE) {
     die("Error creating table: " . $conn->error);
 }
 
+// Create islem_kayitlari table if not exists
+$create_islem_kayitlari_table = "CREATE TABLE IF NOT EXISTS islem_kayitlari (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    islem_tipi ENUM('sarki_ekleme', 'sarki_silme', 'sarki_degistirme', 'kategori_ekleme', 'kategori_silme', 'kategori_degistirme') NOT NULL,
+    kaynak ENUM('deezer', 'mp3', 'manuel') NOT NULL,
+    kullanici_id INT NOT NULL,
+    kullanici_adi VARCHAR(100) NOT NULL,
+    tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    detay TEXT NOT NULL,
+    sarki_adi VARCHAR(255) NULL,
+    sanatci VARCHAR(255) NULL,
+    kategori VARCHAR(255) NULL,
+    kategori_adi VARCHAR(255) NULL,
+    eski_deger TEXT NULL,
+    yeni_deger TEXT NULL,
+    INDEX idx_islem_tipi (islem_tipi),
+    INDEX idx_kaynak (kaynak),
+    INDEX idx_tarih (tarih),
+    INDEX idx_kullanici (kullanici_id)
+)";
+
+if ($conn->query($create_islem_kayitlari_table) === FALSE) {
+    die("Error creating table: " . $conn->error);
+}
+
 // Add foreign key constraint for ayarlar table if it doesn't exist
 $check_foreign_key = "SELECT CONSTRAINT_NAME 
                       FROM information_schema.TABLE_CONSTRAINTS 

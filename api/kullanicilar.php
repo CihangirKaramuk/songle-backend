@@ -1,4 +1,5 @@
 <?php
+session_start();
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
@@ -11,6 +12,19 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch($method) {
     case 'GET':
+        // Eğer toplam_kullanici parametresi varsa sadece sayıyı döndür
+        if (isset($_GET['toplam_kullanici']) && $_GET['toplam_kullanici'] === 'true') {
+            $sql = "SELECT COUNT(*) as toplam_kullanici FROM kullanicilar";
+            $result = $conn->query($sql);
+            $count_result = $result->fetch_assoc();
+            
+            echo json_encode([
+                'success' => true,
+                'toplam_kullanici' => $count_result['toplam_kullanici']
+            ]);
+            break;
+        }
+        
         // Get users with optional filters
         $sql = "SELECT * FROM kullanicilar";
         $conditions = [];
@@ -60,6 +74,15 @@ switch($method) {
                 while($row = $result->fetch_assoc()) {
                     $kullanicilar[] = $row;
                 }
+                
+                // Session'ı temizle ve yeniden oluştur
+                session_destroy();
+                session_start();
+                
+                // Session'a güncel kullanıcı bilgisini kaydet
+                $_SESSION['kullanici_id'] = $kullanicilar[0]['id'];
+                $_SESSION['kullanici_adi'] = $kullanicilar[0]['kullanici_adi'];
+                $_SESSION['yetki'] = $kullanicilar[0]['yetki'];
             }
         
             echo json_encode(
@@ -74,7 +97,16 @@ switch($method) {
             http_response_code(400);
             echo json_encode(["message" => "Incomplete data.", "success" => false, "is_admin" => false]);
         }
-        break;  
+        break;
+        
+    case 'DELETE':
+        // Logout işlemi
+        session_destroy();
+        echo json_encode([
+            "message" => "Logout successful.",
+            "success" => true
+        ]);
+        break;
         
     default:
         http_response_code(405);

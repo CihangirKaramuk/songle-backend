@@ -1,4 +1,5 @@
 <?php
+session_start();
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
@@ -134,6 +135,51 @@ switch($method) {
         if ($stmt->execute()) {
             $new_id = $conn->insert_id;
             
+            // İşlem kaydı ekle
+            $kullanici_id = $_SESSION['kullanici_id'] ?? 1;
+            $kullanici_adi = $_SESSION['kullanici_adi'] ?? 'admin';
+            
+            // Session'da kullanıcı adı yoksa veya eski ise veritabanından al
+            if ($kullanici_adi === 'admin' || empty($kullanici_adi)) {
+                $sql = "SELECT kullanici_adi FROM kullanicilar WHERE id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $kullanici_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+                
+                if ($user) {
+                    $kullanici_adi = $user['kullanici_adi'];
+                    // Session'ı güncelle
+                    $_SESSION['kullanici_adi'] = $kullanici_adi;
+                }
+            }
+            
+            $islem_kayit = [
+                'islem_tipi' => 'kategori_ekleme',
+                'kaynak' => 'manuel',
+                'kullanici_id' => $kullanici_id,
+                'kullanici_adi' => $kullanici_adi,
+                'detay' => "'$isim' kategorisi eklendi",
+                'kategori_adi' => $isim
+            ];
+            
+            // İşlem kaydını ekle
+            $islem_sql = "INSERT INTO islem_kayitlari (
+                islem_tipi, kaynak, kullanici_id, kullanici_adi, detay, kategori_adi
+            ) VALUES (?, ?, ?, ?, ?, ?)";
+            
+            $islem_stmt = $conn->prepare($islem_sql);
+            $islem_stmt->bind_param("ssisss", 
+                $islem_kayit['islem_tipi'],
+                $islem_kayit['kaynak'],
+                $islem_kayit['kullanici_id'],
+                $islem_kayit['kullanici_adi'],
+                $islem_kayit['detay'],
+                $islem_kayit['kategori_adi']
+            );
+            $islem_stmt->execute();
+            
             // Eklenen kategoriyi getir
             $get_sql = "SELECT k.*, p.isim as parent_isim 
                         FROM kategoriler k 
@@ -240,6 +286,71 @@ switch($method) {
         $stmt->bind_param($types, ...$values);
         
         if ($stmt->execute()) {
+            // İşlem kaydı ekle
+            $kullanici_id = $_SESSION['kullanici_id'] ?? 1;
+            $kullanici_adi = $_SESSION['kullanici_adi'] ?? 'admin';
+            
+            // Session'da kullanıcı adı yoksa veya eski ise veritabanından al
+            if ($kullanici_adi === 'admin' || empty($kullanici_adi)) {
+                $sql = "SELECT kullanici_adi FROM kullanicilar WHERE id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $kullanici_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+                
+                if ($user) {
+                    $kullanici_adi = $user['kullanici_adi'];
+                    // Session'ı güncelle
+                    $_SESSION['kullanici_adi'] = $kullanici_adi;
+                }
+            }
+            
+            $eski_degerler = [];
+            $yeni_degerler = [];
+            
+            if (isset($input['isim']) && !empty(trim($input['isim']))) {
+                $eski_degerler[] = "İsim: " . $current_category['isim'];
+                $yeni_degerler[] = "İsim: " . trim($input['isim']);
+            }
+            
+            if (isset($input['parent_id'])) {
+                $old_parent = $current_category['parent_id'] ? $current_category['parent_id'] : 'Ana Kategori';
+                $new_parent = $input['parent_id'] ? $input['parent_id'] : 'Ana Kategori';
+                $eski_degerler[] = "Parent: " . $old_parent;
+                $yeni_degerler[] = "Parent: " . $new_parent;
+            }
+            
+            $islem_kayit = [
+                'islem_tipi' => 'kategori_degistirme',
+                'kaynak' => 'manuel',
+                'kullanici_id' => $kullanici_id,
+                'kullanici_adi' => $kullanici_adi,
+                'detay' => "'{$current_category['isim']}' kategorisi güncellendi",
+                'kategori_adi' => $current_category['isim'],
+                'eski_deger' => implode(', ', $eski_degerler),
+                'yeni_deger' => implode(', ', $yeni_degerler)
+            ];
+            
+            // İşlem kaydını ekle
+            $islem_sql = "INSERT INTO islem_kayitlari (
+                islem_tipi, kaynak, kullanici_id, kullanici_adi, detay, 
+                kategori_adi, eski_deger, yeni_deger
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $islem_stmt = $conn->prepare($islem_sql);
+            $islem_stmt->bind_param("ssisssss", 
+                $islem_kayit['islem_tipi'],
+                $islem_kayit['kaynak'],
+                $islem_kayit['kullanici_id'],
+                $islem_kayit['kullanici_adi'],
+                $islem_kayit['detay'],
+                $islem_kayit['kategori_adi'],
+                $islem_kayit['eski_deger'],
+                $islem_kayit['yeni_deger']
+            );
+            $islem_stmt->execute();
+            
             // Güncellenmiş kategoriyi getir
             $get_sql = "SELECT k.*, p.isim as parent_isim 
                         FROM kategoriler k 
@@ -295,6 +406,51 @@ switch($method) {
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {
+            // İşlem kaydı ekle
+            $kullanici_id = $_SESSION['kullanici_id'] ?? 1;
+            $kullanici_adi = $_SESSION['kullanici_adi'] ?? 'admin';
+            
+            // Session'da kullanıcı adı yoksa veya eski ise veritabanından al
+            if ($kullanici_adi === 'admin' || empty($kullanici_adi)) {
+                $sql = "SELECT kullanici_adi FROM kullanicilar WHERE id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $kullanici_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+                
+                if ($user) {
+                    $kullanici_adi = $user['kullanici_adi'];
+                    // Session'ı güncelle
+                    $_SESSION['kullanici_adi'] = $kullanici_adi;
+                }
+            }
+            
+            $islem_kayit = [
+                'islem_tipi' => 'kategori_silme',
+                'kaynak' => 'manuel',
+                'kullanici_id' => $kullanici_id,
+                'kullanici_adi' => $kullanici_adi,
+                'detay' => "'{$category['isim']}' kategorisi silindi",
+                'kategori_adi' => $category['isim']
+            ];
+            
+            // İşlem kaydını ekle
+            $islem_sql = "INSERT INTO islem_kayitlari (
+                islem_tipi, kaynak, kullanici_id, kullanici_adi, detay, kategori_adi
+            ) VALUES (?, ?, ?, ?, ?, ?)";
+            
+            $islem_stmt = $conn->prepare($islem_sql);
+            $islem_stmt->bind_param("ssisss", 
+                $islem_kayit['islem_tipi'],
+                $islem_kayit['kaynak'],
+                $islem_kayit['kullanici_id'],
+                $islem_kayit['kullanici_adi'],
+                $islem_kayit['detay'],
+                $islem_kayit['kategori_adi']
+            );
+            $islem_stmt->execute();
+            
             jsonSuccess(null, "Kategori başarıyla silindi");
         } else {
             jsonError("Kategori silinirken hata oluştu: " . $stmt->error);
