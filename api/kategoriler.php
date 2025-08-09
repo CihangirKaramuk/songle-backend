@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../config/session.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
@@ -90,6 +90,11 @@ switch($method) {
         
         // JSON input'u al
         $input = json_decode(file_get_contents('php://input'), true);
+        // Require admin
+        if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+            http_response_code(401);
+            jsonError('Yetkisiz', 401);
+        }
         
         if (!$input) {
             jsonError("Invalid JSON input", 400);
@@ -206,6 +211,10 @@ switch($method) {
         // ID'yi URL'den al
         if (!isset($_GET['id'])) {
             jsonError("Kategori ID'si gereklidir", 400);
+        }
+        if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+            http_response_code(401);
+            jsonError('Yetkisiz', 401);
         }
         
         $id = $conn->real_escape_string($_GET['id']);
@@ -376,6 +385,10 @@ switch($method) {
         
         if (!isset($_GET['id'])) {
             jsonError("Kategori ID'si gereklidir", 400);
+        }
+        if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+            http_response_code(401);
+            jsonError('Yetkisiz', 401);
         }
         
         $id = $conn->real_escape_string($_GET['id']);

@@ -6,6 +6,7 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 require_once '../config/database.php';
+require_once '../config/session.php';
 
 // Helper to return error responses as JSON and exit
 function jsonError(string $message, int $statusCode = 500): void {
@@ -98,6 +99,13 @@ switch($method) {
         }
         
         $kullanici_id = $_GET['kullanici_id'];
+        // Sadece kendi ayarını okuyabilsin (admin istediği kullanıcıyı okuyabilir)
+        if (!isset($_SESSION['yetki'])) {
+            jsonError('Yetkisiz', 401);
+        }
+        if ((int)$_SESSION['yetki'] !== 1 && (int)$kullanici_id !== (int)($_SESSION['kullanici_id'] ?? 0)) {
+            jsonError('Erişim reddedildi', 403);
+        }
         
         // Validate user exists using prepared statement
         $user_check_sql = "SELECT id FROM kullanicilar WHERE id = ?";
@@ -129,6 +137,12 @@ switch($method) {
         }
         
         $kullanici_id = $input['kullanici_id'];
+        if (!isset($_SESSION['yetki'])) {
+            jsonError('Yetkisiz', 401);
+        }
+        if ((int)$_SESSION['yetki'] !== 1 && (int)$kullanici_id !== (int)($_SESSION['kullanici_id'] ?? 0)) {
+            jsonError('Erişim reddedildi', 403);
+        }
         
         // Validate user exists using prepared statement
         $user_check_sql = "SELECT id FROM kullanicilar WHERE id = ?";

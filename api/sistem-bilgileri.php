@@ -5,6 +5,7 @@ header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../config/database.php';
+require_once '../config/session.php';
 
 try {
     // Toplam şarkı sayısı

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../config/session.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
@@ -20,33 +20,40 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch($method) {
     case 'GET':
        // Get all songs or filter by parameters
-        $sql = "SELECT * FROM sarkilar";
-        $conditions = [];
+        // Build with prepared statements
+        $base = "SELECT * FROM sarkilar";
+        $clauses = [];
+        $types = '';
+        $vals = [];
 
         if (isset($_GET['id'])) {
-            $id = $conn->real_escape_string($_GET['id']);
-            $conditions[] = "id = $id";
+            $clauses[] = "id = ?";
+            $types .= 'i';
+            $vals[] = (int)$_GET['id'];
         }
         if (isset($_GET['linkliler'])) {
-            $conditions[] = "kapak LIKE '%http%'";
+            $clauses[] = "kapak LIKE ?";
+            $types .= 's';
+            $vals[] = '%http%';
         }
-
         if (isset($_GET['kategori'])) {
-            $kategori = $conn->real_escape_string($_GET['kategori']);
-            $conditions[] = "kategori = '$kategori'";
+            $clauses[] = "kategori = ?";
+            $types .= 's';
+            $vals[] = (string)$_GET['kategori'];
         }
-
         if (isset($_GET['cevap'])) {
-            $cevap = $conn->real_escape_string($_GET['cevap']);
-            $conditions[] = "cevap = '$cevap'";
+            $clauses[] = "cevap = ?";
+            $types .= 's';
+            $vals[] = (string)$_GET['cevap'];
         }
 
-        if (!empty($conditions)) {
-            $sql .= " WHERE " . implode(" AND ", $conditions);
+        $sql = $base . (empty($clauses) ? '' : (' WHERE ' . implode(' AND ', $clauses)));
+        $stmt = $conn->prepare($sql);
+        if (!empty($vals)) {
+            $stmt->bind_param($types, ...$vals);
         }
-
-        
-        $result = $conn->query($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
         if ($result === false) {
             jsonError("Database query error: " . $conn->error);
         }
@@ -62,6 +69,10 @@ switch($method) {
         break;
         
     case 'POST':
+        if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+            http_response_code(401);
+            jsonError('Yetkisiz', 401);
+        }
         // Add new song
         $data = json_decode(file_get_contents("php://input"));
         
@@ -145,6 +156,10 @@ switch($method) {
         break;
         
     case 'PUT':
+        if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+            http_response_code(401);
+            jsonError('Yetkisiz', 401);
+        }
         // Update song
         $data = json_decode(file_get_contents("php://input"));
         
@@ -203,9 +218,10 @@ switch($method) {
             }
             
             if(!empty($updates)) {
-                $sql = "UPDATE sarkilar SET " . implode(', ', $updates) . " WHERE id = $id";
-                
-                if($conn->query($sql) === TRUE) {
+                $sql = "UPDATE sarkilar SET " . implode(', ', $updates) . " WHERE id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('i', $id);
+                if($stmt->execute()) {
                     // İşlem kaydı ekle
                     $kullanici_id = $_SESSION['kullanici_id'] ?? 1;
                     $kullanici_adi = $_SESSION['kullanici_adi'] ?? 'admin';
@@ -277,9 +293,13 @@ switch($method) {
         break;
         
     case 'DELETE':
+        if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+            http_response_code(401);
+            jsonError('Yetkisiz', 401);
+        }
         // Delete song
         if(isset($_GET['id'])) {
-            $id = $conn->real_escape_string($_GET['id']);
+            $id = (int)$_GET['id'];
             
             // Şarkı bilgilerini al
             $song_sql = "SELECT * FROM sarkilar WHERE id = ?";
@@ -295,9 +315,10 @@ switch($method) {
                 break;
             }
             
-            $sql = "DELETE FROM sarkilar WHERE id = $id";
-            
-            if($conn->query($sql) === TRUE) {
+            $sql = "DELETE FROM sarkilar WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $id);
+            if($stmt->execute()) {
                 // İşlem kaydı ekle
                 $kullanici_id = $_SESSION['kullanici_id'] ?? 1;
                 $kullanici_adi = $_SESSION['kullanici_adi'] ?? 'admin';

@@ -1,54 +1,82 @@
 <?php
-session_start();
+require_once '../config/session.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../config/database.php';
+// Admin zorunlu (işlem kayıtları sadece admin görsün)
+if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Yetkisiz']);
+    exit;
+}
 
 try {
     // Filtreleme parametreleri
     $islem_tipi = $_GET['islem_tipi'] ?? '';
     $kaynak = $_GET['kaynak'] ?? '';
+    $from_date = $_GET['from_date'] ?? '';
+    $to_date = $_GET['to_date'] ?? '';
     $sayfa = (int)($_GET['sayfa'] ?? 1);
     $limit = (int)($_GET['limit'] ?? 10);
+    $limit = $limit > 0 ? $limit : 10;
+    $sayfa = $sayfa > 0 ? $sayfa : 1;
     $offset = ($sayfa - 1) * $limit;
-    
-    // SQL sorgusu oluştur
+
+    // WHERE koşulları ve parametre tipleri/values
     $where_conditions = [];
-    $params = [];
-    
-    if ($islem_tipi) {
-        $where_conditions[] = "islem_tipi = ?";
-        $params[] = $islem_tipi;
+    $where_types = '';
+    $where_values = [];
+
+    if (!empty($islem_tipi)) {
+        $where_conditions[] = 'islem_tipi = ?';
+        $where_types .= 's';
+        $where_values[] = $islem_tipi;
     }
-    
-    if ($kaynak) {
-        $where_conditions[] = "kaynak = ?";
-        $params[] = $kaynak;
+
+    if (!empty($kaynak)) {
+        $where_conditions[] = 'kaynak = ?';
+        $where_types .= 's';
+        $where_values[] = $kaynak;
     }
-    
+
+    if (!empty($from_date)) {
+        $where_conditions[] = 'DATE(tarih) >= ?';
+        $where_types .= 's';
+        $where_values[] = $from_date;
+    }
+
+    if (!empty($to_date)) {
+        $where_conditions[] = 'DATE(tarih) <= ?';
+        $where_types .= 's';
+        $where_values[] = $to_date;
+    }
+
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-    
-    // Toplam kayıt sayısını al
+
+    // Toplam kayıt sayısı
     $count_sql = "SELECT COUNT(*) as total FROM islem_kayitlari $where_clause";
     $count_stmt = $conn->prepare($count_sql);
-    if (!empty($params)) {
-        $count_stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    if (!empty($where_values)) {
+        $count_stmt->bind_param($where_types, ...$where_values);
     }
     $count_stmt->execute();
     $count_result = $count_stmt->get_result();
-    $total_records = $count_result->fetch_assoc()['total'];
-    
-    // Kayıtları al
+    $total_records = (int)($count_result->fetch_assoc()['total'] ?? 0);
+
+    // Kayıtları al (sayfalı)
     $sql = "SELECT * FROM islem_kayitlari $where_clause ORDER BY tarih DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
-    
     $stmt = $conn->prepare($sql);
-    if (!empty($params)) {
-        $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    if (!empty($where_values)) {
+        // whereTypes + ii (limit, offset)
+        $types = $where_types . 'ii';
+        $values = array_merge($where_values, [$limit, $offset]);
+        $stmt->bind_param($types, ...$values);
+    } else {
+        // Sadece limit/offset
+        $stmt->bind_param('ii', $limit, $offset);
     }
     $stmt->execute();
     $result = $stmt->get_result();

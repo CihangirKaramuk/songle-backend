@@ -1,11 +1,18 @@
 <?php
-session_start();
+require_once '../config/session.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../config/database.php';
+require_once '../config/session.php';
+
+if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Yetkisiz']);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
