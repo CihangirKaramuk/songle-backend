@@ -77,8 +77,8 @@ if ($conn->query($create_ayarlar_table) === FALSE) {
 // Create islem_kayitlari table if not exists
 $create_islem_kayitlari_table = "CREATE TABLE IF NOT EXISTS islem_kayitlari (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    islem_tipi ENUM('sarki_ekleme', 'sarki_silme', 'sarki_degistirme', 'kategori_ekleme', 'kategori_silme', 'kategori_degistirme') NOT NULL,
-    kaynak ENUM('deezer', 'mp3', 'manuel') NOT NULL,
+    islem_tipi ENUM('sarki_ekleme', 'sarki_silme', 'sarki_degistirme', 'kategori_ekleme', 'kategori_silme', 'kategori_degistirme', 'yetkili_ekleme', 'yetkili_silme', 'yetkili_guncelleme', 'sifre_sifirlama', 'rol_degistirme') NOT NULL,
+    kaynak ENUM('deezer', 'mp3', 'manuel', 'admin_panel') NOT NULL,
     kullanici_id INT NOT NULL,
     kullanici_adi VARCHAR(100) NOT NULL,
     tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -89,6 +89,8 @@ $create_islem_kayitlari_table = "CREATE TABLE IF NOT EXISTS islem_kayitlari (
     kategori_adi VARCHAR(255) NULL,
     eski_deger TEXT NULL,
     yeni_deger TEXT NULL,
+    hedef_kullanici_id INT NULL,
+    hedef_kullanici_adi VARCHAR(100) NULL,
     INDEX idx_islem_tipi (islem_tipi),
     INDEX idx_kaynak (kaynak),
     INDEX idx_tarih (tarih),

@@ -31,9 +31,18 @@ try {
     $where_values = [];
 
     if (!empty($islem_tipi)) {
-        $where_conditions[] = 'islem_tipi = ?';
-        $where_types .= 's';
-        $where_values[] = $islem_tipi;
+        // Virgülle ayrılmış işlem tiplerini destekle
+        if (strpos($islem_tipi, ',') !== false) {
+            $islem_tipleri = explode(',', $islem_tipi);
+            $placeholders = str_repeat('?,', count($islem_tipleri) - 1) . '?';
+            $where_conditions[] = "islem_tipi IN ($placeholders)";
+            $where_types .= str_repeat('s', count($islem_tipleri));
+            $where_values = array_merge($where_values, $islem_tipleri);
+        } else {
+            $where_conditions[] = 'islem_tipi = ?';
+            $where_types .= 's';
+            $where_values[] = $islem_tipi;
+        }
     }
 
     if (!empty($kaynak)) {

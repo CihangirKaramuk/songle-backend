@@ -84,7 +84,35 @@ switch($method) {
             $ins = $conn->prepare("INSERT INTO kullanicilar (kullanici_adi, sifre, yetki) VALUES (?, ?, ?)");
             $ins->bind_param('ssi', $newUser, $hash, $newYetki);
             if ($ins->execute()) {
-                echo json_encode(["success" => true, "message" => "Kullanıcı oluşturuldu", "id" => $conn->insert_id]);
+                $newUserId = $conn->insert_id;
+                
+                // İşlem kaydı ekle
+                try {
+                    $islem_sql = "INSERT INTO islem_kayitlari (
+                        islem_tipi, kaynak, kullanici_id, kullanici_adi, detay,
+                        hedef_kullanici_id, hedef_kullanici_adi
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    $islem_stmt = $conn->prepare($islem_sql);
+                    $islem_tipi = 'yetkili_ekleme';
+                    $kaynak = 'admin_panel';
+                    $detay = "'$newUser' kullanıcısı yetkili olarak eklendi";
+                    $islem_stmt->bind_param('ssissis', 
+                        $islem_tipi, 
+                        $kaynak, 
+                        $_SESSION['kullanici_id'], 
+                        $_SESSION['kullanici_adi'], 
+                        $detay,
+                        $newUserId,
+                        $newUser
+                    );
+                    $islem_stmt->execute();
+                    
+                    echo json_encode(["success" => true, "message" => "Kullanıcı oluşturuldu", "id" => $newUserId]);
+                } catch (Exception $e) {
+                    // İşlem kaydı eklenemedi ama kullanıcı oluşturuldu
+                    error_log("İşlem kaydı eklenemedi: " . $e->getMessage());
+                    echo json_encode(["success" => true, "message" => "Kullanıcı oluşturuldu (log hatası: " . $e->getMessage() . ")", "id" => $newUserId]);
+                }
             } else {
                 http_response_code(500);
                 echo json_encode(["success" => false, "message" => "Kullanıcı oluşturulamadı"]);
@@ -149,7 +177,53 @@ switch($method) {
             $stmt = $conn->prepare($sql);
             $stmt->bind_param($types, ...$vals);
             if ($stmt->execute()) {
-                echo json_encode(["success" => true, "message" => "Kullanıcı güncellendi"]);
+                // İşlem kaydı ekle
+                try {
+                    $islem_tipi = 'yetkili_guncelleme';
+                    $kaynak = 'admin_panel';
+                    
+                    // Güncellenen kullanıcının bilgilerini al
+                    $user_info_sql = "SELECT kullanici_adi FROM kullanicilar WHERE id = ?";
+                    $user_info_stmt = $conn->prepare($user_info_sql);
+                    $user_info_stmt->bind_param('i', $id);
+                    $user_info_stmt->execute();
+                    $user_info = $user_info_stmt->get_result()->fetch_assoc();
+                    $hedef_kullanici_adi = $user_info['kullanici_adi'];
+                    
+                    $detay = "'$hedef_kullanici_adi' kullanıcısı güncellendi";
+                    if (isset($data->kullanici_adi)) {
+                        $detay = "'$hedef_kullanici_adi' kullanıcısının adı '$newUser' olarak değiştirildi";
+                    }
+                    if (isset($data->yetki)) {
+                        $yetki_text = (int)$data->yetki === 1 ? 'Admin' : 'Kullanıcı';
+                        $detay = "'$hedef_kullanici_adi' kullanıcısının rolü '$yetki_text' olarak değiştirildi";
+                    }
+                    if (isset($data->yeni_sifre)) {
+                        $detay = "'$hedef_kullanici_adi' kullanıcısının şifresi sıfırlandı";
+                    }
+                    
+                    $islem_sql = "INSERT INTO islem_kayitlari (
+                        islem_tipi, kaynak, kullanici_id, kullanici_adi, detay,
+                        hedef_kullanici_id, hedef_kullanici_adi
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    $islem_stmt = $conn->prepare($islem_sql);
+                    $islem_stmt->bind_param('ssissis', 
+                        $islem_tipi, 
+                        $kaynak, 
+                        $_SESSION['kullanici_id'], 
+                        $_SESSION['kullanici_adi'], 
+                        $detay,
+                        $id,
+                        $hedef_kullanici_adi
+                    );
+                    $islem_stmt->execute();
+                    
+                    echo json_encode(["success" => true, "message" => "Kullanıcı güncellendi"]);
+                } catch (Exception $e) {
+                    // İşlem kaydı eklenemedi ama kullanıcı güncellendi
+                    error_log("İşlem kaydı eklenemedi: " . $e->getMessage());
+                    echo json_encode(["success" => true, "message" => "Kullanıcı güncellendi (log hatası: " . $e->getMessage() . ")"]);
+                }
             } else {
                 http_response_code(500);
                 echo json_encode(["success" => false, "message" => "Güncellenemedi"]);
@@ -176,9 +250,39 @@ switch($method) {
                 echo json_encode(["success" => false, "message" => "Kendi hesabınızı silemezsiniz"]);
                 break;
             }
+            
+            // Silinecek kullanıcının bilgilerini al
+            $user_info_sql = "SELECT kullanici_adi FROM kullanicilar WHERE id = ?";
+            $user_info_stmt = $conn->prepare($user_info_sql);
+            $user_info_stmt->bind_param('i', $id);
+            $user_info_stmt->execute();
+            $user_info = $user_info_stmt->get_result()->fetch_assoc();
+            $hedef_kullanici_adi = $user_info['kullanici_adi'];
+            
             $stmt = $conn->prepare('DELETE FROM kullanicilar WHERE id = ?');
             $stmt->bind_param('i', $id);
             if ($stmt->execute()) {
+                // İşlem kaydı ekle
+                $islem_tipi = 'yetkili_silme';
+                $kaynak = 'admin_panel';
+                $detay = "'$hedef_kullanici_adi' kullanıcısı silindi";
+                
+                $islem_sql = "INSERT INTO islem_kayitlari (
+                    islem_tipi, kaynak, kullanici_id, kullanici_adi, detay,
+                    hedef_kullanici_id, hedef_kullanici_adi
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $islem_stmt = $conn->prepare($islem_sql);
+                $islem_stmt->bind_param('ssissis', 
+                    $islem_tipi, 
+                    $kaynak, 
+                    $_SESSION['kullanici_id'], 
+                    $_SESSION['kullanici_adi'], 
+                    $detay,
+                    $id,
+                    $hedef_kullanici_adi
+                );
+                $islem_stmt->execute();
+                
                 echo json_encode(["success" => true, "message" => "Kullanıcı silindi"]);
             } else {
                 http_response_code(500);

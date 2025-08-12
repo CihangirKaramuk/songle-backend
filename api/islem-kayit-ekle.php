@@ -52,11 +52,12 @@ try {
     
     $sql = "INSERT INTO islem_kayitlari (
         islem_tipi, kaynak, kullanici_id, kullanici_adi, detay, 
-        sarki_adi, sanatci, kategori, kategori_adi, eski_deger, yeni_deger
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        sarki_adi, sanatci, kategori, kategori_adi, eski_deger, yeni_deger,
+        hedef_kullanici_id, hedef_kullanici_adi
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssissssssss", 
+    $stmt->bind_param("ssissssssssi", 
         $input['islem_tipi'],
         $input['kaynak'],
         $input['kullanici_id'],
@@ -67,7 +68,9 @@ try {
         $input['kategori'] ?? null,
         $input['kategori_adi'] ?? null,
         $input['eski_deger'] ?? null,
-        $input['yeni_deger'] ?? null
+        $input['yeni_deger'] ?? null,
+        $input['hedef_kullanici_id'] ?? null,
+        $input['hedef_kullanici_adi'] ?? null
     );
     
     $stmt->execute();

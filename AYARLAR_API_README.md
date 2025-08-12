@@ -1,8 +1,19 @@
-# Ayarlar (Settings) API Documentation
+# Ayarlar (Settings) API Documentation ⚙️
 
-Bu API, kullanıcı ayarlarını yönetmek için kullanılır. Ayarlar veritabanında güvenli bir şekilde saklanır ve kullanıcı farklı cihazlardan giriş yaptığında korunur.
+Bu API, kullanıcı ayarlarını, sistem ayarlarını ve kullanıcı yönetimini yönetmek için kullanılır. Ayarlar veritabanında güvenli bir şekilde saklanır ve kullanıcı farklı cihazlardan giriş yaptığında korunur.
 
-## Veritabanı Tablosu
+## ✨ Özellikler
+
+- **Kullanıcı Ayarları**: Tema, sayfa boyutu, bildirim tercihleri
+- **Sistem Ayarları**: Uygulama geneli ayarlar
+- **Kullanıcı Yönetimi**: Yetkili kullanıcı CRUD işlemleri
+- **İşlem Kayıtları**: Tüm admin işlemlerinin detaylı loglanması
+- **Rol Tabanlı Erişim**: Admin, moderator ve user rolleri
+- **Güvenlik**: Şifre hashleme ve oturum yönetimi
+
+## 🗄️ Veritabanı Tabloları
+
+### ayarlar Tablosu
 
 ```sql
 CREATE TABLE ayarlar (
@@ -12,11 +23,51 @@ CREATE TABLE ayarlar (
     sayfa_boyutu INT DEFAULT 20,
     bildirim_sesi BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (kullanici_id) REFERENCES kullanicilar(id) ON DELETE CASCADE
+);
+```
+
+### kullanicilar Tablosu
+
+```sql
+CREATE TABLE kullanicilar (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    kullanici_adi VARCHAR(100) UNIQUE NOT NULL,
+    sifre VARCHAR(255) NOT NULL,
+    yetki ENUM('admin', 'moderator', 'user') DEFAULT 'user',
+    email VARCHAR(255),
+    son_giris TIMESTAMP NULL,
+    aktif BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
 
-## API Endpoints
+### islem_kayitlari Tablosu
+
+```sql
+CREATE TABLE islem_kayitlari (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    islem_tipi ENUM('sarki_ekleme', 'sarki_silme', 'sarki_degistirme',
+                    'kategori_ekleme', 'kategori_silme', 'kategori_degistirme',
+                    'yetkili_ekleme', 'yetkili_silme', 'yetkili_guncelleme',
+                    'sifre_sifirlama', 'rol_degistirme') NOT NULL,
+    kaynak ENUM('deezer', 'mp3', 'manuel', 'admin_panel') NOT NULL,
+    kullanici_id INT NOT NULL,
+    kullanici_adi VARCHAR(100) NOT NULL,
+    tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    detay TEXT NOT NULL,
+    hedef_kullanici_id INT NULL,
+    hedef_kullanici_adi VARCHAR(100) NULL,
+    INDEX idx_islem_tipi (islem_tipi),
+    INDEX idx_kaynak (kaynak),
+    INDEX idx_tarih (tarih),
+    INDEX idx_kullanici (kullanici_id)
+);
+```
+
+## 🔌 API Endpoints
 
 ### 1. Ayarları Getir
 
@@ -87,151 +138,317 @@ GET /api/ayarlar.php?kullanici_id=1
 - **400**: Geçersiz JSON, eksik kullanıcı ID, geçersiz tema değeri, geçersiz sayfa boyutu
 - **404**: Kullanıcı bulunamadı
 
-## Kullanım Örnekleri
+### 3. Kullanıcı Yönetimi
 
-### JavaScript/Frontend Kullanımı:
+**POST** `/api/kullanicilar.php`
 
-```javascript
-// Ayarları getir
-async function getAyarlar(kullaniciId) {
-  try {
-    const response = await fetch(`/api/ayarlar.php?kullanici_id=${kullaniciId}`)
-    const data = await response.json()
+#### Request Body:
 
-    if (data.success) {
-      return data.data
-    } else {
-      throw new Error(data.error)
+```json
+{
+  "op": "create",
+  "kullanici_adi": "yeni_kullanici",
+  "sifre": "güvenli_şifre123",
+  "yetki": "moderator",
+  "email": "kullanici@example.com"
+}
+```
+
+#### Operasyon Tipleri:
+
+- **`op: 'create'`**: Yeni kullanıcı ekle
+- **`op: 'update'`**: Kullanıcı bilgilerini güncelle
+- **`op: 'delete'`**: Kullanıcı sil
+- **`op: 'list'`**: Tüm kullanıcıları listele
+- **`op: 'change_password'`**: Şifre değiştir
+- **`op: 'change_role'`**: Rol değiştir
+
+#### Örnek Yanıtlar:
+
+**Kullanıcı Ekleme:**
+
+```json
+{
+  "success": true,
+  "message": "Kullanıcı başarıyla eklendi",
+  "user_id": 123
+}
+```
+
+**Kullanıcı Listesi:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "kullanici_adi": "admin",
+      "yetki": "admin",
+      "email": "admin@example.com",
+      "son_giris": "2024-01-15 10:30:00",
+      "aktif": true,
+      "created_at": "2024-01-01 00:00:00"
     }
-  } catch (error) {
-    console.error('Ayarlar getirilemedi:', error)
-    // Varsayılan ayarları döndür
-    return {
-      tema: 'dark',
-      sayfa_boyutu: 20,
-      bildirim_sesi: true,
+  ]
+}
+```
+
+### 4. İşlem Kayıtları
+
+**GET** `/api/islem-kayitlari.php`
+
+#### Parametreler:
+
+- `islem_tipi` (optional): Filtreleme için işlem tipi
+- `kaynak` (optional): Filtreleme için kaynak
+- `sayfa` (optional): Sayfa numarası (varsayılan: 1)
+- `limit` (optional): Sayfa başına kayıt sayısı (varsayılan: 10)
+
+#### Örnek İstek:
+
+```
+GET /api/islem-kayitlari.php?islem_tipi=yetkili_ekleme&sayfa=1&limit=20
+```
+
+#### Yanıt:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "islem_tipi": "yetkili_ekleme",
+      "kaynak": "admin_panel",
+      "kullanici_id": 1,
+      "kullanici_adi": "admin",
+      "tarih": "2024-01-15 10:30:00",
+      "detay": "yeni_kullanici kullanıcısı yetkili olarak eklendi",
+      "hedef_kullanici_id": 2,
+      "hedef_kullanici_adi": "yeni_kullanici"
     }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_records": 100,
+    "limit": 20
   }
 }
+```
 
-// Ayarları kaydet
-async function saveAyarlar(kullaniciId, ayarlar) {
+## 🔐 Güvenlik Özellikleri
+
+### Şifre Yönetimi
+
+- **Hashleme**: Şifreler `password_hash()` ile hashlenir
+- **Doğrulama**: `password_verify()` ile şifre doğrulanır
+- **Güçlü Şifre**: Minimum 8 karakter, büyük/küçük harf, sayı, özel karakter
+
+### Oturum Yönetimi
+
+- **Session**: PHP session kullanımı
+- **Timeout**: Oturum zaman aşımı kontrolü
+- **Güvenli Çıkış**: Session verilerini temizleme
+
+### Yetkilendirme
+
+- **Rol Tabanlı**: Admin, moderator, user rolleri
+- **İşlem Kontrolü**: Her işlem için yetki kontrolü
+- **Audit Trail**: Tüm işlemler loglanır
+
+## 📱 Frontend Entegrasyonu
+
+### Kullanıcı Yönetimi
+
+```javascript
+// Yeni kullanıcı ekle
+async function addUser(userData) {
   try {
-    const response = await fetch('/api/ayarlar.php', {
+    const response = await fetch('/api/kullanicilar.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        kullanici_id: kullaniciId,
-        tema: ayarlar.tema,
-        sayfa_boyutu: ayarlar.sayfa_boyutu,
-        bildirim_sesi: ayarlar.bildirim_sesi,
+        op: 'create',
+        kullanici_adi: userData.username,
+        sifre: userData.password,
+        yetki: userData.role,
+        email: userData.email,
       }),
     })
 
-    const data = await response.json()
-
-    if (data.success) {
-      console.log('Ayarlar kaydedildi')
-      return true
+    const result = await response.json()
+    if (result.success) {
+      showToast('Kullanıcı başarıyla eklendi', 'success')
+      loadUsers() // Kullanıcı listesini yenile
     } else {
-      throw new Error(data.error)
+      showToast(result.error, 'error')
     }
   } catch (error) {
-    console.error('Ayarlar kaydedilemedi:', error)
-    return false
+    showToast('Bir hata oluştu', 'error')
   }
 }
 
-// Kullanım örneği
-const kullaniciId = 1
+// Kullanıcı rolünü değiştir
+async function changeUserRole(userId, newRole) {
+  try {
+    const response = await fetch('/api/kullanicilar.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        op: 'update',
+        kullanici_id: userId,
+        yetki: newRole,
+      }),
+    })
 
-// Ayarları getir
-const ayarlar = await getAyarlar(kullaniciId)
-console.log('Mevcut ayarlar:', ayarlar)
-
-// Ayarları güncelle
-ayarlar.tema = 'light'
-ayarlar.sayfa_boyutu = 50
-ayarlar.bildirim_sesi = false
-
-// Yeni ayarları kaydet
-await saveAyarlar(kullaniciId, ayarlar)
+    const result = await response.json()
+    if (result.success) {
+      showToast('Rol başarıyla değiştirildi', 'success')
+      loadUsers()
+    } else {
+      showToast(result.error, 'error')
+    }
+  } catch (error) {
+    showToast('Bir hata oluştu', 'error')
+  }
+}
 ```
 
-### PHP Kullanımı:
+### İşlem Kayıtları
 
-```php
-// Ayarları getir
-function getAyarlar($kullanici_id) {
-    $url = "http://localhost/songle-backend/api/ayarlar.php?kullanici_id=$kullanici_id";
-    $response = file_get_contents($url);
-    return json_decode($response, true);
+```javascript
+// İşlem kayıtlarını yükle
+async function loadOperationLogs(filters = {}) {
+  try {
+    const params = new URLSearchParams()
+
+    if (filters.islem_tipi) params.append('islem_tipi', filters.islem_tipi)
+    if (filters.sayfa) params.append('sayfa', filters.sayfa)
+    if (filters.limit) params.append('limit', filters.limit)
+
+    const response = await fetch(
+      `/api/islem-kayitlari.php?${params.toString()}`
+    )
+    const result = await response.json()
+
+    if (result.success) {
+      renderOperationLogs(result.data)
+      updatePagination(result.pagination)
+    } else {
+      showToast(result.error, 'error')
+    }
+  } catch (error) {
+    showToast('İşlem kayıtları yüklenirken hata oluştu', 'error')
+  }
 }
 
-// Ayarları kaydet
-function saveAyarlar($kullanici_id, $ayarlar) {
-    $data = [
-        'kullanici_id' => $kullanici_id,
-        'tema' => $ayarlar['tema'],
-        'sayfa_boyutu' => $ayarlar['sayfa_boyutu'],
-        'bildirim_sesi' => $ayarlar['bildirim_sesi']
-    ];
+// Filtreleme
+function applyFilters() {
+  const islemTipi = document.getElementById('islemTipiFiltre').value
+  const filters = {}
 
-    $context = stream_context_create([
-        'http' => [
-            'method' => 'POST',
-            'header' => 'Content-Type: application/json',
-            'content' => json_encode($data)
-        ]
-    ]);
+  if (islemTipi === 'sarki_islemleri') {
+    filters.islem_tipi = 'sarki_ekleme,sarki_silme,sarki_degistirme'
+  } else if (islemTipi === 'kategori_islemleri') {
+    filters.islem_tipi = 'kategori_ekleme,kategori_silme,kategori_degistirme'
+  } else if (islemTipi === 'yetkili_islemleri') {
+    filters.islem_tipi =
+      'yetkili_ekleme,yetkili_silme,yetkili_guncelleme,sifre_sifirlama,rol_degistirme'
+  }
 
-    $response = file_get_contents("http://localhost/songle-backend/api/ayarlar.php", false, $context);
-    return json_decode($response, true);
+  loadOperationLogs(filters)
 }
-
-// Kullanım örneği
-$kullanici_id = 1;
-
-// Ayarları getir
-$ayarlar = getAyarlar($kullanici_id);
-echo "Mevcut ayarlar: " . print_r($ayarlar, true);
-
-// Ayarları güncelle
-$ayarlar['data']['tema'] = 'light';
-$ayarlar['data']['sayfa_boyutu'] = 50;
-$ayarlar['data']['bildirim_sesi'] = false;
-
-// Yeni ayarları kaydet
-$result = saveAyarlar($kullanici_id, $ayarlar['data']);
-echo "Kaydetme sonucu: " . print_r($result, true);
 ```
 
-## Güvenlik ve Validasyon
+## 🎯 Kullanım Senaryoları
 
-1. **Kullanıcı Doğrulama**: Her istek için kullanıcının veritabanında var olup olmadığı kontrol edilir
-2. **Tema Validasyonu**: Sadece "dark" ve "light" değerleri kabul edilir
-3. **Sayfa Boyutu Validasyonu**: 1-100 arası değerler kabul edilir
-4. **SQL Injection Koruması**: Prepared statements kullanılır
-5. **XSS Koruması**: JSON response'ları güvenli şekilde encode edilir
+### 1. Yeni Yetkili Ekleme
 
-## Varsayılan Değerler
+1. Admin panelinde "Ayarlar" sekmesine git
+2. "Kullanıcı Yönetimi" bölümünde "Yeni Kullanıcı" butonuna tıkla
+3. Kullanıcı bilgilerini gir (kullanıcı adı, şifre, rol)
+4. "Ekle" butonuna tıkla
+5. İşlem kayıtlarında "yetkili_ekleme" kaydı görünür
 
-Eğer kullanıcının henüz ayarları yoksa, aşağıdaki varsayılan değerler döndürülür:
+### 2. Kullanıcı Rolü Değiştirme
+
+1. Kullanıcı listesinde ilgili kullanıcının "Düzenle" butonuna tıkla
+2. Rol dropdown'ından yeni rolü seç
+3. "Güncelle" butonuna tıkla
+4. İşlem kayıtlarında "rol_degistirme" kaydı görünür
+
+### 3. Şifre Sıfırlama
+
+1. Kullanıcı listesinde ilgili kullanıcının "Şifre Sıfırla" butonuna tıkla
+2. Yeni şifreyi gir ve onayla
+3. İşlem kayıtlarında "sifre_sifirlama" kaydı görünür
+
+## 🚨 Hata Yönetimi
+
+### API Hata Kodları
+
+- **`INVALID_OPERATION`**: Geçersiz operasyon
+- **`USER_NOT_FOUND`**: Kullanıcı bulunamadı
+- **`DUPLICATE_USERNAME`**: Kullanıcı adı zaten mevcut
+- **`INVALID_ROLE`**: Geçersiz rol
+- **`INSUFFICIENT_PERMISSIONS`**: Yetersiz yetki
+- **`INVALID_PASSWORD`**: Geçersiz şifre formatı
+
+### Hata Yanıt Formatı
 
 ```json
 {
-  "tema": "dark",
-  "sayfa_boyutu": 20,
-  "bildirim_sesi": true
+  "success": false,
+  "error": "Hata mesajı",
+  "error_code": "ERROR_CODE",
+  "details": "Detaylı hata açıklaması"
 }
 ```
 
-## Hata Kodları
+## 📊 Performans Optimizasyonu
 
-- **200**: Başarılı
-- **400**: Bad Request (geçersiz parametreler)
-- **404**: Not Found (kullanıcı bulunamadı)
-- **405**: Method Not Allowed (desteklenmeyen HTTP metodu)
-- **500**: Internal Server Error (sunucu hatası)
+### Veritabanı
+
+- **İndeksler**: Tüm arama alanlarında index'ler
+- **Prepared Statements**: SQL injection koruması
+- **Query Optimization**: Büyük veri setleri için optimize edilmiş sorgular
+
+### API
+
+- **Pagination**: Server-side pagination desteği
+- **Caching**: Sık kullanılan veriler için cache
+- **Response Compression**: Gzip compression
+
+## 🔄 Güncellemeler
+
+### v2.0.0 - Major Update
+
+- Kapsamlı kullanıcı yönetimi sistemi
+- İşlem kayıtları entegrasyonu
+- Rol tabanlı erişim kontrolü
+- Gelişmiş güvenlik özellikleri
+
+### v1.5.0 - Enhanced Settings
+
+- Tema yönetimi
+- Sayfa boyutu ayarları
+- Bildirim tercihleri
+
+### v1.0.0 - Initial Release
+
+- Temel ayar yönetimi
+- Basit kullanıcı sistemi
+
+## 📝 Not
+
+Bu API, admin panelindeki tüm kullanıcı yönetimi işlemlerini destekler. Tüm işlemler otomatik olarak loglanır ve güvenlik için gerekli kontroller yapılır. API kullanımı için admin yetkisi gereklidir.
+
+---
+
+**Güvenli ve kapsamlı kullanıcı yönetimi! 🔐✨**
