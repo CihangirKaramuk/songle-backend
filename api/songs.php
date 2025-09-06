@@ -83,6 +83,31 @@ switch($method) {
             $dosya = $conn->real_escape_string($data->dosya);
             $kapak = isset($data->kapak) && $data->kapak !== '' ? $conn->real_escape_string($data->kapak) : null;
             
+            // Aynı şarkının olup olmadığını kontrol et (boşlukları temizleyerek)
+            $cevap_trimmed = trim($cevap);
+            $sarki_trimmed = trim($sarki);
+            
+            $check_sql = "SELECT id, cevap, sarki FROM sarkilar WHERE TRIM(cevap) = ? AND TRIM(sarki) = ?";
+            $check_stmt = $conn->prepare($check_sql);
+            $check_stmt->bind_param("ss", $cevap_trimmed, $sarki_trimmed);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+            
+            
+            if($check_result->num_rows > 0) {
+                $existing_song = $check_result->fetch_assoc();
+                http_response_code(409);
+                echo json_encode([
+                    "error" => "Bu şarkı zaten mevcut!",
+                    "existing_song" => [
+                        "id" => $existing_song['id'],
+                        "cevap" => $existing_song['cevap'],
+                        "sarki" => $existing_song['sarki']
+                    ]
+                ]);
+                exit;
+            }
+            
             // Insert including optional kapak column
             if($kapak !== null) {
                 $sql = "INSERT INTO sarkilar (kategori, cevap, sarki, dosya, kapak) VALUES ('$kategori', '$cevap', '$sarki', '$dosya', '$kapak')";
