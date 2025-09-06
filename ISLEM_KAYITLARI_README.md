@@ -315,24 +315,35 @@ await fetch('/api/islem-kayit-ekle.php', {
 
 ## 🔄 Güncellemeler
 
+### v2.1.0 - Enhanced Operation Logs
+
+- **Batch Operations**: Toplu işlem kaydı silme ve seçim sistemi
+- **Gelişmiş Filtreleme**: Çoklu işlem tipi filtreleme ve arama
+- **Modal Sistemi**: Detaylı işlem kaydı görüntüleme modalleri
+- **Real-time Updates**: Anlık işlem kaydı güncellemeleri
+- **Gelişmiş UI**: Modern kullanıcı arayüzü ve etkileşim
+
 ### v2.0.0 - Major Update
 
 - Yetkili işlem kayıtları eklendi
 - Grup filtreleme sistemi
 - Hedef kullanıcı bilgileri
 - Gelişmiş sayfalama
+- Audit trail sistemi
 
 ### v1.5.0 - Enhanced Logging
 
 - Çoklu işlem tipi filtreleme
 - Server-side pagination
 - Performans optimizasyonları
+- Kullanıcı aktivite takibi
 
 ### v1.0.0 - Initial Release
 
 - Temel işlem kayıtları
 - Şarkı ve kategori işlemleri
 - Basit filtreleme
+- Temel loglama sistemi
 
 ## 📝 Not
 

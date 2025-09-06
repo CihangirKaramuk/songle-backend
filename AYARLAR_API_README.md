@@ -427,23 +427,34 @@ function applyFilters() {
 
 ## 🔄 Güncellemeler
 
+### v2.1.0 - Enhanced User Management
+
+- **Gelişmiş Kullanıcı Yönetimi**: Şifre sıfırlama ve rol değiştirme modalleri
+- **Batch Operations**: Toplu kullanıcı işlemleri ve seçim sistemi
+- **Gelişmiş Güvenlik**: Password hashleme ve session yönetimi
+- **Modal Sistemi**: Kullanıcı dostu modal dialoglar
+- **Real-time Updates**: Anlık kullanıcı listesi güncellemeleri
+
 ### v2.0.0 - Major Update
 
 - Kapsamlı kullanıcı yönetimi sistemi
 - İşlem kayıtları entegrasyonu
 - Rol tabanlı erişim kontrolü
 - Gelişmiş güvenlik özellikleri
+- API optimizasyonu
 
 ### v1.5.0 - Enhanced Settings
 
 - Tema yönetimi
 - Sayfa boyutu ayarları
 - Bildirim tercihleri
+- Kullanıcı ayarları sistemi
 
 ### v1.0.0 - Initial Release
 
 - Temel ayar yönetimi
 - Basit kullanıcı sistemi
+- Temel güvenlik önlemleri
 
 ## 📝 Not
 

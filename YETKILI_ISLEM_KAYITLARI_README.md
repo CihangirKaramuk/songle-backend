@@ -24,6 +24,26 @@ Bu dokümantasyon, admin panelindeki yetkili ekleme/silme/güncelleme işlemleri
   - `hedef_kullanici_id` - İşlem yapılan kullanıcının ID'si
   - `hedef_kullanici_adi` - İşlem yapılan kullanıcının adı
 
+### 2. Gelişmiş Özellikler
+
+#### Modal Sistemi
+
+- **Şifre Sıfırlama Modalı**: Güvenli şifre sıfırlama işlemi
+- **Rol Değiştirme Modalı**: Kullanıcı rolü değiştirme işlemi
+- **Kullanıcı Silme Onayı**: Güvenli kullanıcı silme işlemi
+
+#### Batch Operations
+
+- **Toplu Seçim**: Çoklu kullanıcı seçimi ve işlemi
+- **Toplu Silme**: Seçilen kullanıcıları toplu silme
+- **Gelişmiş UI**: Modern kullanıcı arayüzü ve etkileşim
+
+#### Güvenlik Özellikleri
+
+- **Password Hashleme**: Güvenli şifre hashleme sistemi
+- **Session Yönetimi**: Güvenli oturum kontrolü
+- **Yetki Kontrolü**: Rol tabanlı erişim kontrolü
+
 ### 2. Backend Güncellemeleri
 
 #### `api/kullanicilar.php`

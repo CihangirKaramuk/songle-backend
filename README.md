@@ -6,40 +6,43 @@ Songle, şarkı tahmin oyunu için gelişmiş bir PHP backend API'sidir. Bu API,
 
 ### 🎵 Şarkı Yönetimi
 
-- Şarkı listeleme ve filtreleme
-- Kategoriye göre şarkı filtreleme
-- Yeni şarkı ekleme (manuel, Deezer, MP3)
-- Mevcut şarkıyı güncelleme
-- Şarkı silme
-- Album kapak yönetimi
+- **Gelişmiş Şarkı CRUD**: Tam CRUD operasyonları ile şarkı yönetimi
+- **Dinamik Filtreleme**: Kategori, sanatçı, şarkı adına göre filtreleme
+- **Çoklu Kaynak Desteği**: Manuel, Deezer, MP3 yükleme seçenekleri
+- **Album Kapak Yönetimi**: Otomatik kapak yükleme ve yönetimi
+- **Duplicate Kontrolü**: Aynı şarkının tekrar eklenmesini önleme
+- **Batch Operations**: Toplu şarkı silme ve yönetim işlemleri
 
 ### 👥 Kullanıcı Yönetimi
 
-- Yetkili kullanıcı ekleme/silme/güncelleme
-- Rol tabanlı erişim kontrolü
-- Şifre sıfırlama
-- Kullanıcı rolü değiştirme
-- Güvenli oturum yönetimi
+- **Güvenli Kullanıcı Sistemi**: Password hashleme ve güvenli oturum yönetimi
+- **Rol Tabanlı Erişim**: Admin, moderator, user rolleri ile yetkilendirme
+- **Şifre Yönetimi**: Güvenli şifre sıfırlama ve değiştirme
+- **Kullanıcı Profilleri**: Detaylı kullanıcı bilgileri ve aktivite takibi
+- **Session Yönetimi**: Güvenli oturum kontrolü ve timeout
 
 ### 📁 Kategori Yönetimi
 
-- Ana kategori ve alt kategori yönetimi
-- Kategori ekleme/silme/güncelleme
-- Şarkı-kategori ilişkilendirme
+- **Hiyerarşik Yapı**: Ana kategori ve alt kategori sistemi
+- **Dinamik Kategoriler**: Admin panelinden kategori oluşturma ve yönetimi
+- **Şarkı-Kategori İlişkilendirme**: Çoklu kategori desteği
+- **Kategori Filtreleme**: Gelişmiş filtreleme ve arama seçenekleri
 
 ### 📊 İşlem Kayıtları
 
-- Tüm admin işlemlerinin detaylı loglanması
-- Kullanıcı aktivite takibi
-- İşlem tipi ve kaynak filtreleme
-- Zaman damgalı kayıtlar
-- Hedef kullanıcı bilgileri
+- **Kapsamlı Loglama**: Tüm admin işlemlerinin detaylı kaydı
+- **Kullanıcı Aktivite Takibi**: Hangi kullanıcının ne yaptığının takibi
+- **Gelişmiş Filtreleme**: İşlem tipi, kaynak, tarih bazında filtreleme
+- **Pagination Desteği**: Büyük veri setleri için sayfalama
+- **Audit Trail**: Tam işlem geçmişi ve değişiklik takibi
+- **Hedef Kullanıcı Bilgileri**: İşlem yapılan kullanıcı bilgileri
 
 ### 🔗 Deezer Entegrasyonu
 
-- Deezer API ile şarkı arama
-- Otomatik şarkı indirme
-- Album kapak otomatik yükleme
+- **API Entegrasyonu**: Deezer API ile doğrudan şarkı arama
+- **Otomatik İndirme**: Şarkı ve album kapak otomatik indirme
+- **Metadata Yönetimi**: Sanatçı, şarkı adı, album bilgileri otomatik doldurma
+- **Hata Yönetimi**: API hatalarının güvenli yönetimi
 
 ## 🚀 Kurulum
 
@@ -83,9 +86,11 @@ Songle, şarkı tahmin oyunu için gelişmiş bir PHP backend API'sidir. Bu API,
 
 - **GET** `/api/songs.php` - Tüm şarkıları listeler
 - **GET** `/api/songs.php?kategori=turkce-rock` - Kategoriye göre filtreler
-- **POST** `/api/songs.php` - Yeni şarkı ekler
-- **PUT** `/api/songs.php` - Şarkı günceller
-- **DELETE** `/api/songs.php?id=1` - Şarkı siler
+- **GET** `/api/songs.php?id=1` - Belirli şarkıyı getirir
+- **GET** `/api/songs.php?linkliler=1` - Sadece kapak resmi olan şarkıları getirir
+- **POST** `/api/songs.php` - Yeni şarkı ekler (admin yetkisi gerekli)
+- **PUT** `/api/songs.php` - Şarkı günceller (admin yetkisi gerekli)
+- **DELETE** `/api/songs.php?id=1` - Şarkı siler (admin yetkisi gerekli)
 
 #### 👥 Kullanıcı Yönetimi
 
@@ -94,16 +99,27 @@ Songle, şarkı tahmin oyunu için gelişmiş bir PHP backend API'sidir. Bu API,
   - `op: 'update'` - Kullanıcı güncelle
   - `op: 'delete'` - Kullanıcı sil
   - `op: 'list'` - Kullanıcıları listele
+  - `op: 'change_password'` - Şifre değiştir
+  - `op: 'change_role'` - Rol değiştir
 
 #### 📁 Kategori Yönetimi
 
 - **POST** `/api/kategoriler.php` - Kategori CRUD işlemleri
 - **GET** `/api/kategoriler.php` - Kategorileri listele
+- **GET** `/api/kategoriler.php?parent=1` - Ana kategorileri listele
+- **GET** `/api/kategoriler.php?parent=0` - Alt kategorileri listele
 
 #### 📊 İşlem Kayıtları
 
 - **GET** `/api/islem-kayitlari.php` - İşlem kayıtlarını listele
 - **POST** `/api/islem-kayit-ekle.php` - İşlem kaydı ekle
+- **POST** `/api/islem-kayitlari-sil.php` - İşlem kayıtlarını sil
+
+#### ⚙️ Ayarlar ve Sistem
+
+- **GET** `/api/ayarlar.php` - Kullanıcı ayarlarını getir
+- **POST** `/api/ayarlar.php` - Kullanıcı ayarlarını kaydet
+- **GET** `/api/sistem-bilgileri.php` - Sistem istatistiklerini getir
 
 #### 🔗 Deezer Entegrasyonu
 
@@ -304,24 +320,35 @@ http://localhost/songle-backend/add_example_data.php
 
 ## 🔄 Güncellemeler
 
+### v2.1.0 - Enhanced API Features
+
+- **Gelişmiş Şarkı Yönetimi**: Duplicate kontrolü ve batch operations
+- **Kapsamlı İşlem Kayıtları**: Detaylı audit trail ve filtreleme
+- **Güvenlik İyileştirmeleri**: Password hashleme ve session yönetimi
+- **API Optimizasyonu**: Performans iyileştirmeleri ve hata yönetimi
+- **Deezer Entegrasyonu**: Gelişmiş API entegrasyonu ve hata yönetimi
+
 ### v2.0.0 - Major Update
 
-- Modüler JavaScript mimarisi
-- Kapsamlı işlem kayıtları
-- Gelişmiş kullanıcı yönetimi
-- Deezer entegrasyonu
+- Modüler JavaScript mimarisi ile admin panel
+- Kapsamlı işlem kayıtları sistemi
+- Gelişmiş kullanıcı yönetimi ve rol sistemi
+- Deezer API entegrasyonu
+- Batch operations ve gelişmiş filtreleme
 
 ### v1.5.0 - Operation Logs
 
 - İşlem kayıtları sistemi
 - Kullanıcı aktivite takibi
-- Audit trail
+- Audit trail ve compliance
+- Pagination ve filtreleme desteği
 
 ### v1.0.0 - Initial Release
 
 - Temel CRUD işlemleri
 - Basit admin panel
-- Şarkı yönetimi
+- Şarkı ve kategori yönetimi
+- Temel güvenlik önlemleri
 
 ## 📄 Lisans
 
