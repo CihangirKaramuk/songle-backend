@@ -318,16 +318,39 @@ switch($method) {
             $eski_degerler = [];
             $yeni_degerler = [];
             
+            // Sadece değişen alanları ekle
             if (isset($input['isim']) && !empty(trim($input['isim']))) {
-                $eski_degerler[] = "İsim: " . $current_category['isim'];
-                $yeni_degerler[] = "İsim: " . trim($input['isim']);
+                // Sadece isim gerçekten değiştiyse ekle
+                if ($current_category['isim'] !== trim($input['isim'])) {
+                    $eski_degerler[] = "İsim: " . $current_category['isim'];
+                    $yeni_degerler[] = "İsim: " . trim($input['isim']);
+                }
             }
             
             if (isset($input['parent_id'])) {
-                $old_parent = $current_category['parent_id'] ? $current_category['parent_id'] : 'Ana Kategori';
-                $new_parent = $input['parent_id'] ? $input['parent_id'] : 'Ana Kategori';
-                $eski_degerler[] = "Parent: " . $old_parent;
-                $yeni_degerler[] = "Parent: " . $new_parent;
+                // Eski parent adını getir
+                $old_parent_name = 'Ana Kategori';
+                if ($current_category['parent_id']) {
+                    $old_parent_query = $conn->query("SELECT isim FROM kategoriler WHERE id = '{$current_category['parent_id']}'");
+                    if ($old_parent_query->num_rows > 0) {
+                        $old_parent_name = $old_parent_query->fetch_assoc()['isim'];
+                    }
+                }
+                
+                // Yeni parent adını getir
+                $new_parent_name = 'Ana Kategori';
+                if ($input['parent_id']) {
+                    $new_parent_query = $conn->query("SELECT isim FROM kategoriler WHERE id = '{$input['parent_id']}'");
+                    if ($new_parent_query->num_rows > 0) {
+                        $new_parent_name = $new_parent_query->fetch_assoc()['isim'];
+                    }
+                }
+                
+                // Sadece parent değiştiyse ekle
+                if ($old_parent_name !== $new_parent_name) {
+                    $eski_degerler[] = "Kategori: " . $old_parent_name;
+                    $yeni_degerler[] = "Kategori: " . $new_parent_name;
+                }
             }
             
             $islem_kayit = [

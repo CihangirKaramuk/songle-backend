@@ -267,17 +267,46 @@ switch($method) {
                         }
                     }
                     
+            // Detay mesajını oluştur - sadece basit mesaj
+            $detay_mesaji = "{$current_song['cevap']} şarkısı güncellendi";
+            
+            // Modal için ayrı detaylı değişiklik bilgileri
+            $modal_eski_degerler = [];
+            $modal_yeni_degerler = [];
+            
+            if (!empty($eski_degerler) && !empty($yeni_degerler)) {
+                foreach ($eski_degerler as $index => $eski) {
+                    $yeni = $yeni_degerler[$index];
+                    // Sadece değişen alanları ekle
+                    if ($eski !== $yeni) {
+                        $alan_adi = '';
+                        if (strpos($eski, 'Kategori:') === 0) $alan_adi = 'Kategori';
+                        elseif (strpos($eski, 'Şarkı Adı:') === 0) $alan_adi = 'Şarkı Adı';
+                        elseif (strpos($eski, 'Sanatçı:') === 0) $alan_adi = 'Sanatçı';
+                        elseif (strpos($eski, 'Dosya:') === 0) $alan_adi = 'Dosya';
+                        elseif (strpos($eski, 'Kapak:') === 0) $alan_adi = 'Kapak';
+                        
+                        if ($alan_adi) {
+                            $eski_deger = str_replace($alan_adi . ': ', '', $eski);
+                            $yeni_deger = str_replace($alan_adi . ': ', '', $yeni);
+                            $modal_eski_degerler[] = "{$alan_adi}: {$eski_deger}";
+                            $modal_yeni_degerler[] = "{$alan_adi}: {$yeni_deger}";
+                        }
+                    }
+                }
+            }
+                    
                     $islem_kayit = [
                         'islem_tipi' => 'sarki_degistirme',
                         'kaynak' => 'manuel',
                         'kullanici_id' => $kullanici_id,
                         'kullanici_adi' => $kullanici_adi,
-                        'detay' => "{$current_song['cevap']} şarkısı güncellendi",
+                        'detay' => $detay_mesaji, // Sadece basit mesaj
                         'sarki_adi' => $current_song['cevap'],
                         'sanatci' => $current_song['sarki'] ?? '',
                         'kategori' => $current_song['kategori'] ?? '',
-                        'eski_deger' => implode(', ', $eski_degerler),
-                        'yeni_deger' => implode(', ', $yeni_degerler)
+                        'eski_deger' => implode(', ', $modal_eski_degerler), // Modal için ayrı format
+                        'yeni_deger' => implode(', ', $modal_yeni_degerler) // Modal için ayrı format
                     ];
                     
                     // İşlem kaydını ekle
