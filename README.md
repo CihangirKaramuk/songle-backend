@@ -75,7 +75,7 @@ Songle, şarkı tahmin oyunu için gelişmiş bir PHP backend API'sidir. Bu API,
 
 4. **Test edin**
    ```bash
-   http://localhost/songle-backend/
+   https://songle.app/songle-backend/
    ```
 
 ## 🔌 API Dokümantasyonu
@@ -277,7 +277,7 @@ echo json_encode($response);
 
 ```bash
 # Örnek veri ekleme
-http://localhost/songle-backend/add_example_data.php
+https://songle.app/songle-backend/add_example_data.php
 ```
 
 ## 🚨 Sorun Giderme

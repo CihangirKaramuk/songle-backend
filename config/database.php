@@ -1,8 +1,8 @@
 <?php
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'songle');
+define('DB_USER', 'songle_user');
+define('DB_PASS', 'Ck10211458484.');
+define('DB_NAME', 'songle_db');
 
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS);
