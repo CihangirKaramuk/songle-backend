@@ -2,10 +2,18 @@
 require_once '../config/session.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+header('Access-Control-Max-Age: 3600');
 
 require_once '../config/database.php';
+
+// Handle CORS preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 // Admin zorunlu (işlem kayıtları sadece admin görsün)
 if (!isset($_SESSION['yetki']) || (int)$_SESSION['yetki'] !== 1) {
     http_response_code(401);

@@ -27,6 +27,12 @@ function jsonSuccess($data = null, string $message = "Success", int $statusCode 
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Handle CORS preflight requests
+if ($method === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 switch($method) {
     case 'GET':
         // GET /kategoriler.php?is_parent=1 (Ana kategoriler)

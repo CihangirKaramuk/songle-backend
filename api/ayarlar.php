@@ -90,6 +90,12 @@ function saveAyarlar($kullanici_id, $ayarlar) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Handle CORS preflight requests
+if ($method === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 switch($method) {
     case 'GET':
         // GET /api/ayarlar?kullanici_id=X (Get user settings)
