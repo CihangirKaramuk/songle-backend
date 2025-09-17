@@ -126,6 +126,16 @@ Songle, şarkı tahmin oyunu için gelişmiş bir PHP backend API'sidir. Bu API,
 - **GET** `/api/deezer-search.php` - Deezer'da şarkı ara
 - **POST** `/api/deezer-download.php` - Şarkı indir
 
+#### 📊 Gelişmiş Özellikler
+
+- **Batch Operations**: Toplu şarkı ve işlem kaydı silme
+- **Real-time Statistics**: Anlık sistem istatistikleri
+- **Advanced Filtering**: Çoklu kriter filtreleme
+- **Pagination Support**: Server-side sayfalama
+- **Theme Management**: Kullanıcı tema tercihleri
+- **Password Security**: Güvenli şifre hashleme
+- **Session Management**: Gelişmiş oturum kontrolü
+
 ### API Yanıt Formatı
 
 ```json
@@ -319,6 +329,16 @@ https://songle.app/songle-backend/add_example_data.php
 - Gzip compression
 
 ## 🔄 Güncellemeler
+
+### v2.2.0 - Gelişmiş Admin Panel ve API Özellikleri
+
+- **Modüler JavaScript Mimarisi**: ES6 modülleri ile tamamen yeniden yapılandırılmış admin panel
+- **Gelişmiş Kullanıcı Yönetimi**: Şifre sıfırlama, rol değiştirme ve toplu işlemler
+- **Kapsamlı İşlem Kayıtları**: Gelişmiş filtreleme, sayfalama ve audit trail sistemi
+- **Batch Operations**: Toplu şarkı ve işlem kaydı silme işlemleri
+- **Sistem İzleme**: Real-time istatistikler ve performans metrikleri
+- **Tema Desteği**: Dark/Light mode ile kullanıcı tercihi yönetimi
+- **Deezer Entegrasyonu**: Gelişmiş API entegrasyonu ve otomatik şarkı indirme
 
 ### v2.1.0 - Enhanced API Features
 

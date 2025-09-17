@@ -4,7 +4,15 @@ Bu dokümantasyon, admin panelindeki yetkili ekleme/silme/güncelleme işlemleri
 
 ## Eklenen Özellikler
 
-### 1. Veritabanı Güncellemeleri
+### 1. Modüler JavaScript Mimarisi (v2.2.0)
+
+- **ES6 Modül Sistemi**: Tamamen yeniden yapılandırılmış admin panel
+- **Merkezi Durum Yönetimi**: Global değişkenlerin merkezi yönetimi
+- **Modüler Yapı**: Her modül kendi sorumluluğuna odaklanır
+- **Performans Optimizasyonu**: Lazy loading ve bundle optimization
+- **Gelişmiş Hata Yönetimi**: Modül bazlı hata yakalama ve raporlama
+
+### 2. Veritabanı Güncellemeleri
 
 #### `islem_kayitlari` Tablosu
 
@@ -92,8 +100,18 @@ Tüm güncellenmiş dosyaların kopyalandığından emin olun:
 - `api/islem-kayit-ekle.php`
 - `config/database.php`
 - `admin/modules/settings.js`
+- `admin/modules/global-variables.js`
+- `admin/modules/utils.js`
 - `admin/api-panel.html`
 - `admin/panel-style.css`
+
+### 3. Modüler Yapı Güncellemesi
+
+Yeni modüler JavaScript mimarisi için:
+
+- `admin/modules/` klasöründeki tüm modül dosyalarını güncelleyin
+- ES6 modül sistemi ile uyumlu hale getirin
+- Global değişken yönetimini merkezi hale getirin
 
 ## Kullanım
 
